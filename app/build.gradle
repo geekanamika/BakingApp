@@ -1,0 +1,45 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 28
+    defaultConfig {
+        applicationId "com.example.android.bakingapp"
+        minSdkVersion 15
+        targetSdkVersion 28
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.android.support:appcompat-v7:28.0.0'
+    implementation "com.android.support.constraint:constraint-layout:$rootProject.ext.constraintLayoutVersion"
+    implementation "com.android.support:design:$rootProject.ext.supportLibraryVersion"
+    implementation "com.android.support:recyclerview-v7:$rootProject.ext.supportLibraryVersion"
+    implementation "com.android.support:cardview-v7:$rootProject.ext.supportLibraryVersion"
+    // retrofit
+    implementation "com.google.code.gson:gson:$rootProject.ext.gsonVersion"
+    implementation "com.android.volley:volley:$rootProject.ext.volleyVersion"
+    // architecture components
+    implementation "android.arch.lifecycle:extensions:$rootProject.ext.lifecycleVersion"
+    annotationProcessor "android.arch.lifecycle:compiler:$lifecycleVersion"
+    // room
+    implementation "android.arch.persistence.room:runtime:$roomVersion"
+    annotationProcessor "android.arch.persistence.room:compiler:$roomVersion"
+    // picasso
+    implementation "com.squareup.picasso:picasso:$rootProject.ext.picassoVersion"
+    // butterknife
+    implementation "com.jakewharton:butterknife:$rootProject.ext.butterKnifeVersion"
+    annotationProcessor "com.jakewharton:butterknife-compiler:$rootProject.ext.butterKnifeVersion"
+    // timber
+    implementation "com.jakewharton.timber:timber:$rootProject.ext.timberVersion"
+
+}
