@@ -1,21 +1,32 @@
 
-package com.example.android.bakingapp.data.entities;
+package com.example.android.bakingapp.data.db.entities;
 
-import java.util.List;
+import android.arch.persistence.room.Embedded;
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
+import android.arch.persistence.room.PrimaryKey;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.google.gson.annotations.Expose;
 
+import java.util.List;
+
+@Entity(tableName = "recipe")
 public class RecipeResponse implements Parcelable
 {
 
+    @PrimaryKey
     @Expose
-    private int id;
+    public int id;
     @Expose
     private String name;
+    @Ignore
+    @Embedded
     @Expose
     private List<Ingredient> ingredients = null;
+    @Ignore
+    @Embedded
     @Expose
     private List<Step> steps = null;
     @Expose
@@ -43,7 +54,7 @@ public class RecipeResponse implements Parcelable
         this.id = ((int) in.readValue((int.class.getClassLoader())));
         this.name = ((String) in.readValue((String.class.getClassLoader())));
         in.readList(this.ingredients, (Ingredient.class.getClassLoader()));
-        in.readList(this.steps, (com.example.android.bakingapp.data.entities.Step.class.getClassLoader()));
+        in.readList(this.steps, (com.example.android.bakingapp.data.db.entities.Step.class.getClassLoader()));
         this.servings = ((int) in.readValue((int.class.getClassLoader())));
         this.image = ((String) in.readValue((String.class.getClassLoader())));
     }

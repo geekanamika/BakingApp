@@ -1,11 +1,14 @@
 package com.example.android.bakingapp.data.remote;
 
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.MutableLiveData;
+
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.example.android.bakingapp.App;
-import com.example.android.bakingapp.data.entities.RecipeResponse;
+import com.example.android.bakingapp.data.db.entities.RecipeResponse;
 import com.example.android.bakingapp.utils.Constant;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -19,41 +22,41 @@ import timber.log.Timber;
  * Created by Anamika Tripathi on 26/10/18.
  */
 public class NetworkDataSource {
-    private StringRequest request;
-    private Gson gson;
-    private GsonBuilder gsonBuilder;
+    private MutableLiveData<List<RecipeResponse>> mutableRecipeData;
 
-    private void deserializeToJson(String response){
-        gsonBuilder = new GsonBuilder();
-        gson = gsonBuilder.create();
-        List<RecipeResponse> responses = Arrays.asList(gson.fromJson(response, RecipeResponse[].class));
-        for (RecipeResponse r: responses
-             ) {
-            Timber.d(r.getName()+ "\n");
+    public NetworkDataSource() {
+        this.mutableRecipeData = new MutableLiveData<>();
+    }
+
+    private void deserializeToJson(String response) {
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        Gson gson = gsonBuilder.create();
+        mutableRecipeData.setValue(Arrays.asList(gson.fromJson(response, RecipeResponse[].class)));
+    }
+
+    private StringRequest getStringRequestForRecipe() {
+        return new StringRequest(Request.Method.GET, Constant.RECIPE_URL,
+
+        new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                deserializeToJson(response);
+            }
+        },
+        new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Timber.e(error);
+            }
         }
+);
+
     }
 
-    public void getStringRequestForRecipe(){
-        request = new StringRequest(Request.Method.GET, Constant.RECIPE_URL,
-
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        deserializeToJson(response);
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Timber.e(error);
-                    }
-                }
-        );
-    }
-
-    public void addToRequestQueue(){
+    public LiveData<List<RecipeResponse>> getRecipesFromNetwork() {
         MySingleton.getInstance(App.getInstance())
-                .addToRequestQueue(request);
+                .addToRequestQueue(getStringRequestForRecipe());
+        return mutableRecipeData;
     }
 
 

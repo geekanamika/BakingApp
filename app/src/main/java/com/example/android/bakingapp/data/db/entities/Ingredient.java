@@ -1,20 +1,32 @@
 
-package com.example.android.bakingapp.data.entities;
+package com.example.android.bakingapp.data.db.entities;
 
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.google.gson.annotations.Expose;
-
+@Entity
 public class Ingredient implements Parcelable
 {
 
+    public int responseId;
+    @PrimaryKey
+    private int id;
     @Expose
     private float quantity;
     @Expose
     private String measure;
     @Expose
     private String ingredient;
+
+    public Ingredient(float quantity, String measure, String ingredient) {
+        this.quantity = quantity;
+        this.measure = measure;
+        this.ingredient = ingredient;
+    }
+
     public final static Creator<Ingredient> CREATOR = new Creator<Ingredient>() {
 
 

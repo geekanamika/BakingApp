@@ -1,14 +1,17 @@
 
-package com.example.android.bakingapp.data.entities;
+package com.example.android.bakingapp.data.db.entities;
 
+import android.arch.persistence.room.Entity;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.google.gson.annotations.Expose;
 
+@Entity
 public class Step implements Parcelable
 {
 
+    public int reponseId;
     @Expose
     private int id;
     @Expose
@@ -19,6 +22,15 @@ public class Step implements Parcelable
     private String videoURL;
     @Expose
     private String thumbnailURL;
+
+    public Step(int id, String shortDescription, String description, String videoURL, String thumbnailURL) {
+        this.id = id;
+        this.shortDescription = shortDescription;
+        this.description = description;
+        this.videoURL = videoURL;
+        this.thumbnailURL = thumbnailURL;
+    }
+
     public final static Creator<Step> CREATOR = new Creator<Step>() {
 
 
