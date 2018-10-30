@@ -21,12 +21,6 @@ public class Ingredient implements Parcelable
     @Expose
     private String ingredient;
 
-    public Ingredient(float quantity, String measure, String ingredient) {
-        this.quantity = quantity;
-        this.measure = measure;
-        this.ingredient = ingredient;
-    }
-
     public final static Creator<Ingredient> CREATOR = new Creator<Ingredient>() {
 
 
@@ -51,6 +45,14 @@ public class Ingredient implements Parcelable
     }
 
     public Ingredient() {
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public float getQuantity() {

@@ -53,15 +53,19 @@ public class FoodRepository implements RepositoryHelper {
     //Todo Not able to understand, insertion part here
     // get recipe list , check if db-exist or not. if exist send from sqlite or fetch data
     @Override
-    public LiveData<List<RecipeWithIngredientStep>> getRecipeList() {
+    public LiveData<List<RecipeResponse>> getRecipeList() {
+        LiveData<List<RecipeResponse>> responseList = null;
         if (!checkDbExistOrNot()) {
-            LiveData<List<RecipeResponse>> responseList = foodNetworkDataSource.getRecipesFromNetwork();
-            insertRecipeList(responseList.getValue());
-            setDbExist(true);
-            return responseList;
-        } else {
-            return dbHelper.getRecipeList();
+
+            responseList =  foodNetworkDataSource.getRecipesFromNetwork();
+            //insertRecipeList(responseList.getValue());
+            //setDbExist(true);
+
         }
+//        else {
+//            //return dbHelper.getRecipeList();
+//        }
+        return responseList;
     }
 
     // check from preference if db already exist or not
