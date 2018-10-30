@@ -12,11 +12,11 @@ public class RecipeWithIngredientStep {
     @Embedded
     public RecipeResponse response;
 
-    @Relation(parentColumn = "id",
-            entityColumn = "responseId")
-    public List<Ingredient> ingredientList;
-
-    @Relation(parentColumn = "id",
-            entityColumn = "responseId")
-    public List<Step> stepList;
+//    @Relation(parentColumn = "id",
+//            entityColumn = "responseId")
+//    public List<Ingredient> ingredientList;
+//
+//    @Relation(parentColumn = "id",
+//            entityColumn = "responseId")
+//    public List<Step> stepList;
 }

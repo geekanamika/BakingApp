@@ -10,11 +10,11 @@ import android.os.Parcelable;
 
 import com.google.gson.annotations.Expose;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity(tableName = "recipe")
-public class RecipeResponse implements Parcelable
-{
+public class RecipeResponse implements Parcelable {
 
     @PrimaryKey
     @Expose
@@ -33,11 +33,21 @@ public class RecipeResponse implements Parcelable
     private int servings;
     @Expose
     private String image;
-    public final static Creator<RecipeResponse> CREATOR = new Creator<RecipeResponse>() {
+
+    public RecipeResponse(int id, String name, List<Ingredient> ingredients, List<Step> steps, int servings, String image) {
+        this.id = id;
+        this.name = name;
+        this.ingredients = ingredients;
+        this.steps = steps;
+        this.servings = servings;
+        this.image = image;
+    }
+
+    public static Creator<RecipeResponse> CREATOR = new Creator<RecipeResponse>() {
 
 
         @SuppressWarnings({
-            "unchecked"
+                "unchecked"
         })
         public RecipeResponse createFromParcel(Parcel in) {
             return new RecipeResponse(in);
@@ -47,16 +57,37 @@ public class RecipeResponse implements Parcelable
             return (new RecipeResponse[size]);
         }
 
-    }
-    ;
+    };
 
-    protected RecipeResponse(Parcel in) {
+//    public RecipeResponse(Parcel in) {
+//        this.id = in.readInt();
+//        this.name = in.readString();
+//        this.ingredients = new ArrayList<Ingredient>();
+//        in.readTypedList(this.ingredients, Ingredient.CREATOR);
+//        this.steps = new ArrayList<Step>();
+//        in.readTypedList(this.steps, Step.CREATOR);
+//        this.servings = in.readInt();
+//        this.image = in.readString();
+//    }
+
+    private RecipeResponse(Parcel in) {
         this.id = ((int) in.readValue((int.class.getClassLoader())));
         this.name = ((String) in.readValue((String.class.getClassLoader())));
+        ingredients = new ArrayList<Ingredient>();
+        steps = new ArrayList<Step>();
         in.readList(this.ingredients, (Ingredient.class.getClassLoader()));
-        in.readList(this.steps, (com.example.android.bakingapp.data.db.entities.Step.class.getClassLoader()));
+        in.readList(this.steps, (Step.class.getClassLoader()));
         this.servings = ((int) in.readValue((int.class.getClassLoader())));
         this.image = ((String) in.readValue((String.class.getClassLoader())));
+    }
+
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeValue(id);
+        dest.writeValue(name);
+        dest.writeList(ingredients);
+        dest.writeList(steps);
+        dest.writeValue(servings);
+        dest.writeValue(image);
     }
 
     public RecipeResponse() {
@@ -110,17 +141,8 @@ public class RecipeResponse implements Parcelable
         this.image = image;
     }
 
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeValue(id);
-        dest.writeValue(name);
-        dest.writeList(ingredients);
-        dest.writeList(steps);
-        dest.writeValue(servings);
-        dest.writeValue(image);
-    }
-
     public int describeContents() {
-        return  0;
+        return 0;
     }
 
 }

@@ -2,5 +2,12 @@
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="margin_8dp">8dp</dimen>
     <dimen name="card_view_item_margin">4dp</dimen>
+    <dimen name="material_card_edge_margin">8dp</dimen>
+    <dimen name="material_card_elevation_resting">4dp</dimen>
+    <dimen name="material_card_title_block_large_padding_top">8dp</dimen>
+    <dimen name="material_card_title_block_large_padding_bottom">8dp</dimen>
+    <dimen name="material_card_title_block_padding_horizontal">8dp</dimen>
+    <dimen name="material_card_supporting_text_text_size">16sp</dimen>
+    <dimen name="material_list_icon_size">32dp</dimen>
 
 </resources>

@@ -2,6 +2,7 @@ package com.example.android.bakingapp.ui.main;
 
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Movie;
 import android.os.Bundle;
@@ -18,6 +19,7 @@ import android.widget.ProgressBar;
 import com.example.android.bakingapp.R;
 import com.example.android.bakingapp.data.FoodRepository;
 import com.example.android.bakingapp.data.db.entities.RecipeResponse;
+import com.example.android.bakingapp.ui.detail.RecipeDetailActivity;
 import com.example.android.bakingapp.utils.Constant;
 import com.example.android.bakingapp.utils.InjectorUtil;
 
@@ -53,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(RecipeResponse recipeResponse) {
                 Timber.d("item clicked " + recipeResponse.getName());
+                startDetailActivity(recipeResponse);
             }
         });
         recipeListView.setAdapter(adapter);
@@ -68,6 +71,12 @@ public class MainActivity extends AppCompatActivity {
             LinearLayoutManager manager = new LinearLayoutManager(this);
             recipeListView.setLayoutManager(manager);
         }
+    }
+
+    private void startDetailActivity(RecipeResponse recipeResponse) {
+        Intent intent = new Intent(MainActivity.this, RecipeDetailActivity.class);
+        intent.putExtra(Constant.EXTRA_KEY, recipeResponse);
+        startActivity(intent);
     }
 
     private void viewModelSetUp() {

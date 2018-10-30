@@ -30,6 +30,8 @@ dependencies {
     implementation "com.android.volley:volley:$rootProject.ext.volleyVersion"
     // architecture components
     implementation "android.arch.lifecycle:extensions:$rootProject.ext.lifecycleVersion"
+    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
+    implementation 'com.android.support:support-v4:28.0.0'
     annotationProcessor "android.arch.lifecycle:compiler:$lifecycleVersion"
     // room
     implementation "android.arch.persistence.room:runtime:$roomVersion"

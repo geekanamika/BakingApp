@@ -2,34 +2,38 @@
 package com.example.android.bakingapp.data.db.entities;
 
 import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 
 @Entity
-public class Step implements Parcelable
-{
-
-    public int responseId;
+public class Step implements Parcelable {
     @PrimaryKey
     @Expose
+    @SerializedName("id")
     private int id;
     @Expose
+    @SerializedName("shortDescription")
     private String shortDescription;
     @Expose
+    @SerializedName("description")
     private String description;
     @Expose
+    @SerializedName("videoURL")
     private String videoURL;
     @Expose
+    @SerializedName("thumbnailURL")
     private String thumbnailURL;
 
     public final static Creator<Step> CREATOR = new Creator<Step>() {
 
 
         @SuppressWarnings({
-            "unchecked"
+                "unchecked"
         })
         public Step createFromParcel(Parcel in) {
             return new Step(in);
@@ -39,18 +43,35 @@ public class Step implements Parcelable
             return (new Step[size]);
         }
 
-    }
-    ;
+    };
 
-    protected Step(Parcel in) {
+    @Ignore
+    public Step(int id, String shortDescription, String description, String videoURL, String thumbnailURL) {
+        this.id = id;
+        this.shortDescription = shortDescription;
+        this.description = description;
+        this.videoURL = videoURL;
+        this.thumbnailURL = thumbnailURL;
+    }
+
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeValue(id);
+        dest.writeValue(shortDescription);
+        dest.writeValue(description);
+        dest.writeValue(videoURL);
+        dest.writeValue(thumbnailURL);
+    }
+
+    public Step() {
+    }
+
+    @Ignore
+    private Step(Parcel in) {
         this.id = ((int) in.readValue((int.class.getClassLoader())));
         this.shortDescription = ((String) in.readValue((String.class.getClassLoader())));
         this.description = ((String) in.readValue((String.class.getClassLoader())));
         this.videoURL = ((String) in.readValue((String.class.getClassLoader())));
         this.thumbnailURL = ((String) in.readValue((String.class.getClassLoader())));
-    }
-
-    public Step() {
     }
 
     public int getId() {
@@ -93,16 +114,8 @@ public class Step implements Parcelable
         this.thumbnailURL = thumbnailURL;
     }
 
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeValue(id);
-        dest.writeValue(shortDescription);
-        dest.writeValue(description);
-        dest.writeValue(videoURL);
-        dest.writeValue(thumbnailURL);
-    }
-
     public int describeContents() {
-        return  0;
+        return 0;
     }
 
 }
