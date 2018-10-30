@@ -24,8 +24,8 @@ public interface RecipeDao {
 //    @Query("SELECT COUNT(id) FROM recipe WHERE id = :recipeId")
 //    LiveData<Integer> isFavourite(int recipeId);
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void insertRecipeList(List<RecipeWithIngredientStep> responses);
+//    @Insert(onConflict = OnConflictStrategy.REPLACE)
+//    void insertRecipeList(List<RecipeWithIngredientStep> responses);
 
 //    @Query("DELETE FROM recipe WHERE id = :deleteId")
 //    void deleteRecipe(int deleteId);

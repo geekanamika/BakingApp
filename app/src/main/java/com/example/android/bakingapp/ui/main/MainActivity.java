@@ -13,6 +13,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 
 import com.example.android.bakingapp.R;
 import com.example.android.bakingapp.data.FoodRepository;
@@ -28,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
     private RecipeListAdapter adapter;
     private boolean tabletSize;
     private MainActivityViewModel viewModel;
+    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +46,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initRecyclerView() {
+        // progress init
+        progressBar = findViewById(R.id.progress_bar);
         RecyclerView recipeListView = findViewById(R.id.list_recipe);
         adapter = new RecipeListAdapter(this, new RecipeListAdapter.ItemClickListener() {
             @Override
@@ -52,11 +56,11 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         recipeListView.setAdapter(adapter);
-        int recyclerViewSpanCount = getResources().getConfiguration().orientation ==
-                Configuration.ORIENTATION_PORTRAIT ? 3 : 5;
+//        int recyclerViewSpanCount = getResources().getConfiguration().orientation ==
+//                Configuration.ORIENTATION_PORTRAIT ? 3 : 5;
 
         if (tabletSize) {
-            GridLayoutManager manager = new GridLayoutManager(this, recyclerViewSpanCount,
+            GridLayoutManager manager = new GridLayoutManager(this, 2,
                     GridLayoutManager.VERTICAL, false);
             recipeListView.setLayoutManager(manager);
             recipeListView.addItemDecoration(new SpacesItemDecoration(4));
@@ -74,6 +78,7 @@ public class MainActivity extends AppCompatActivity {
             public void onChanged(@Nullable List<RecipeResponse> recipeResponses) {
                 if (recipeResponses != null) {
                     adapter.setList(recipeResponses);
+                    progressBar.setVisibility(View.GONE);
                     Timber.d(recipeResponses.toString());
                 }
             }
