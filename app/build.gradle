@@ -43,5 +43,7 @@ dependencies {
     annotationProcessor "com.jakewharton:butterknife-compiler:$rootProject.ext.butterKnifeVersion"
     // timber
     implementation "com.jakewharton.timber:timber:$rootProject.ext.timberVersion"
+    // exoplayer
+    implementation 'com.google.android.exoplayer:exoplayer:r2.2.0'
 
 }

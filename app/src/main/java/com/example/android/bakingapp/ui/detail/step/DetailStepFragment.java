@@ -1,21 +1,76 @@
 package com.example.android.bakingapp.ui.detail.step;
 
+import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
+import android.support.v7.widget.CardView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.example.android.bakingapp.R;
+import com.example.android.bakingapp.data.db.entities.Step;
+import com.example.android.bakingapp.utils.Constant;
+import com.google.android.exoplayer2.DefaultLoadControl;
+import com.google.android.exoplayer2.ExoPlaybackException;
+import com.google.android.exoplayer2.ExoPlayer;
+import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.Timeline;
+import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
+import com.google.android.exoplayer2.source.ExtractorMediaSource;
+import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.source.TrackGroupArray;
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
+import com.google.android.exoplayer2.trackselection.TrackSelector;
+import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
+import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
+import com.google.android.exoplayer2.util.Util;
+import com.squareup.picasso.Picasso;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 
-public class DetailStepFragment extends Fragment {
-    private OnFragmentInteractionListener mListener;
+public class DetailStepFragment extends Fragment implements ExoPlayer.EventListener {
+    private SimpleExoPlayer exoPlayer;
+    private MediaSessionCompat mediaSession;
+    private PlaybackStateCompat.Builder stateBuilder;
+    private Context context;
+    private Step step;
+    private Boolean isTwoPane;
+
+    @BindView(R.id.recipe_step_video_view)
+    SimpleExoPlayerView exoPlayerView;
+    @BindView(R.id.recipe_step_desc)
+    TextView descriptionView;
+    @BindView(R.id.recipe_step_image)
+    ImageView stepThumbnail;
+    @BindView(R.id.recipe_step_desc_card)
+    CardView descriptionCard;
+
 
     public DetailStepFragment() {
         // Required empty public constructor
+    }
+
+    public static DetailStepFragment newInstance(Step step) {
+        DetailStepFragment stepFragment = new DetailStepFragment();
+        Bundle arguments = new Bundle();
+        arguments.putParcelable(Constant.EXTRA_KEY, step);
+        stepFragment.setArguments(arguments);
+        return stepFragment;
     }
 
 
@@ -26,32 +81,212 @@ public class DetailStepFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        if (getArguments() != null) {
+            step = getArguments().getParcelable(Constant.EXTRA_KEY);
+        }
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_detail_step, container, false);
     }
 
-
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        context = getContext();
+        ButterKnife.bind(this, view);
+
+        // check for tablet or phone
+        isTwoPane = getResources().getBoolean(R.bool.isTablet);
+
+        setTextAndImageViewValues();
+
+        setVideoToExoplayer();
+    }
+
+    private void setVideoToExoplayer() {
+        int orientation = getResources().getConfiguration().orientation;
+        String video = step.getVideoURL();
+        if (video != null && !video.isEmpty()) {
+
+            // Init and show video view
+            setViewVisibility(exoPlayerView, true);
+            initializeMediaSession();
+            initializePlayer(Uri.parse(video));
+
+            if (orientation == Configuration.ORIENTATION_LANDSCAPE && !isTwoPane) {
+                // Expand video, hide description, hide system UI for phone's landscape
+                fullScreenView(exoPlayerView);
+                setViewVisibility(descriptionCard, false);
+                hideUI();
+            }
+
         } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
+            // Hide video view
+            setViewVisibility(exoPlayerView, false);
+        }
+    }
+
+    private void setTextAndImageViewValues() {
+        // set description for step for selected recipe
+        descriptionView.setText(step.getDescription());
+
+        // image url for selected step if available
+        String imageUrl = step.getThumbnailURL();
+        // step image to image view if not null else set is invisible
+        if (imageUrl != null && !imageUrl.isEmpty()) {
+            // Load and show Image
+            Picasso.with(context)
+                    .load(imageUrl)
+                    .into(stepThumbnail);
+            setViewVisibility(stepThumbnail, true);
+        } else {
+            // Hide image view
+            setViewVisibility(stepThumbnail, false);
         }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
+        // mListener = null;
     }
 
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
+    @TargetApi(Build.VERSION_CODES.KITKAT)
+    private void hideUI() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            getActivity().getWindow().getDecorView().setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_IMMERSIVE);
+        }
     }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        releasePlayer();
+    }
+
+    private void fullScreenView(SimpleExoPlayerView exoPlayer) {
+        exoPlayer.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
+        exoPlayer.getLayoutParams().width = ViewGroup.LayoutParams.MATCH_PARENT;
+    }
+
+    private void setViewVisibility(View view, boolean show) {
+        if (show) {
+            view.setVisibility(View.VISIBLE);
+        } else {
+            view.setVisibility(View.GONE);
+        }
+    }
+
+    private void initializePlayer(Uri mediaUri) {
+        if (exoPlayer == null) {
+            // setting the player
+            TrackSelector trackSelector = new DefaultTrackSelector();
+            exoPlayer = ExoPlayerFactory.newSimpleInstance(context,
+                    trackSelector, new DefaultLoadControl());
+            // setting player to the exo-playerView
+            exoPlayerView.setPlayer(exoPlayer);
+            // adding listeners, all functions are implemented
+            exoPlayer.addListener(this);
+            // adding media source to the player
+            String userAgent = Util.getUserAgent(getContext(), Constant.USER_AGENT);
+            MediaSource mediaSource = new ExtractorMediaSource(mediaUri, new DefaultDataSourceFactory(
+                    context, userAgent), new DefaultExtractorsFactory(),
+                    null, null);
+            exoPlayer.prepare(mediaSource);
+            exoPlayer.setPlayWhenReady(true);
+        }
+    }
+
+    private void initializeMediaSession() {
+        mediaSession = new MediaSessionCompat(context, Constant.MEDIA_SESSION_TAG);
+
+        mediaSession.setFlags(
+                MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS |
+                        MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
+
+        mediaSession.setMediaButtonReceiver(null);
+        stateBuilder = new PlaybackStateCompat.Builder()
+                .setActions(
+                        PlaybackStateCompat.ACTION_PLAY |
+                                PlaybackStateCompat.ACTION_PAUSE |
+                                PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS |
+                                PlaybackStateCompat.ACTION_PLAY_PAUSE);
+
+        mediaSession.setPlaybackState(stateBuilder.build());
+        mediaSession.setCallback(new MediaSessionCompat.Callback() {
+            @Override
+            public void onPlay() {
+                exoPlayer.setPlayWhenReady(true);
+            }
+
+            @Override
+            public void onPause() {
+                exoPlayer.setPlayWhenReady(false);
+            }
+
+            @Override
+            public void onSkipToPrevious() {
+                exoPlayer.seekTo(0);
+            }
+        });
+        mediaSession.setActive(true);
+    }
+
+    private void releasePlayer() {
+        if (exoPlayer != null) {
+            exoPlayer.stop();
+            exoPlayer.release();
+            exoPlayer = null;
+        }
+
+        if (mediaSession != null) {
+            mediaSession.setActive(false);
+        }
+    }
+
+
+    @Override
+    public void onTimelineChanged(Timeline timeline, Object manifest) {
+
+    }
+
+    @Override
+    public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
+
+    }
+
+    @Override
+    public void onLoadingChanged(boolean isLoading) {
+
+    }
+
+    @Override
+    public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+        if ((playbackState == ExoPlayer.STATE_READY) && playWhenReady) {
+            stateBuilder.setState(PlaybackStateCompat.STATE_PLAYING, exoPlayer.getCurrentPosition(),
+                    1f);
+        } else if ((playbackState == ExoPlayer.STATE_READY)) {
+            stateBuilder.setState(PlaybackStateCompat.STATE_PAUSED, exoPlayer.getCurrentPosition(),
+                    1f);
+        }
+        mediaSession.setPlaybackState(stateBuilder.build());
+    }
+
+    @Override
+    public void onPlayerError(ExoPlaybackException error) {
+
+    }
+
+    @Override
+    public void onPositionDiscontinuity() {
+
+    }
+
 }

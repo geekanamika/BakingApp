@@ -1,7 +1,7 @@
 package com.example.android.bakingapp.ui.detail.list;
 
 import android.content.Context;
-import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -9,7 +9,6 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.style.StyleSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,7 +20,6 @@ import com.example.android.bakingapp.data.db.entities.RecipeResponse;
 import com.example.android.bakingapp.data.db.entities.Step;
 import com.example.android.bakingapp.utils.Constant;
 import com.example.android.bakingapp.utils.StringUtils;
-import com.example.android.bakingapp.utils.TextViewUtils;
 
 import java.util.List;
 
@@ -39,7 +37,7 @@ public class DetailListFragment extends Fragment {
     private Context context;
     private RecipeStepAdapter adapter;
 
-    //private OnFragmentInteractionListener mListener;
+    private OnDetailListListener mListener;
 
     public DetailListFragment() {
         // Required empty public constructor
@@ -92,6 +90,7 @@ public class DetailListFragment extends Fragment {
             @Override
             public void onItemClick(Step step) {
                 Timber.d(step.getShortDescription());
+                mListener.onFragmentInteraction(step);
             }
         });
         stepListView.setAdapter(adapter);
@@ -103,37 +102,27 @@ public class DetailListFragment extends Fragment {
 
     }
 
-//    @Override
-//    public void onAttach(Context context) {
-//        super.onAttach(context);
-//        if (context instanceof OnFragmentInteractionListener) {
-//            mListener = (OnFragmentInteractionListener) context;
-//        } else {
-//            throw new RuntimeException(context.toString()
-//                    + " must implement OnFragmentInteractionListener");
-//        }
-//    }
-//
-//    @Override
-//    public void onDetach() {
-//        super.onDetach();
-//        mListener = null;
-//    }
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof OnDetailListListener) {
+            mListener = (OnDetailListListener) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement OnDetailListListener");
+        }
+    }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-//    public interface OnFragmentInteractionListener {
-//        // TODO: Update argument type and name
-//        void onFragmentInteraction(Uri uri);
-//    }
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mListener = null;
+    }
+
+    public interface OnDetailListListener {
+        // TODO: Update argument type and name
+        void onFragmentInteraction(Step step);
+    }
 
     private void createAndSetIngredientList(List<Ingredient> ingredients) {
 

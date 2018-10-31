@@ -9,5 +9,6 @@
     <dimen name="material_card_title_block_padding_horizontal">8dp</dimen>
     <dimen name="material_card_supporting_text_text_size">16sp</dimen>
     <dimen name="material_list_icon_size">32dp</dimen>
+    <dimen name="recipe_step_image_height">80dp</dimen>
 
 </resources>

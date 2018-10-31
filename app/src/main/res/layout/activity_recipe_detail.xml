@@ -6,8 +6,8 @@
     tools:context=".ui.detail.RecipeDetailActivity">
 
     <FrameLayout
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:id="@+id/detail_list_contaner"/>
+        android:id="@+id/detail_list_container"/>
 
 </android.support.constraint.ConstraintLayout>
