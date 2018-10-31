@@ -80,4 +80,14 @@ public class FoodRepository implements RepositoryHelper {
     public void setDbExist(boolean dbExist) {
         preferenceHelper.setDbExist(dbExist);
     }
+
+    @Override
+    public String getCurrentRecipeIngredient() {
+        return preferenceHelper.getCurrentRecipeIngredient();
+    }
+
+    @Override
+    public void setCurrentRecipeIngredient(String text) {
+        preferenceHelper.setCurrentRecipeIngredient(text);
+    }
 }

@@ -9,4 +9,5 @@ public class Constant {
     public static final String EXTRA_KEY = "EXTRA_KEY";
     public static final String USER_AGENT = "StepVideo";
     public static final String MEDIA_SESSION_TAG = "MEDIA_SESSION_KEY";
+    public static final int PENDING_INTENT_REQUEST_CODE = 415;
 }

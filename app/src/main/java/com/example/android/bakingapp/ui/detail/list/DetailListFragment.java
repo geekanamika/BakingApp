@@ -1,6 +1,9 @@
 package com.example.android.bakingapp.ui.detail.list;
 
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -12,13 +15,17 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RemoteViews;
 import android.widget.TextView;
 
 import com.example.android.bakingapp.R;
+import com.example.android.bakingapp.data.FoodRepository;
 import com.example.android.bakingapp.data.db.entities.Ingredient;
 import com.example.android.bakingapp.data.db.entities.RecipeResponse;
 import com.example.android.bakingapp.data.db.entities.Step;
+import com.example.android.bakingapp.ui.widget.IngredientsWidget;
 import com.example.android.bakingapp.utils.Constant;
+import com.example.android.bakingapp.utils.InjectorUtil;
 import com.example.android.bakingapp.utils.StringUtils;
 
 import java.util.List;
@@ -120,7 +127,6 @@ public class DetailListFragment extends Fragment {
     }
 
     public interface OnDetailListListener {
-        // TODO: Update argument type and name
         void onFragmentInteraction(Step step);
     }
 
@@ -129,13 +135,28 @@ public class DetailListFragment extends Fragment {
         StringBuilder sb = new StringBuilder();
         sb.append(getString(R.string.label_ingredient_list));
 
-        for (Ingredient ing: ingredients
-             ) {
+        for (Ingredient ing : ingredients
+                ) {
             sb.append("\n");
             sb.append(StringUtils.formatIngdedient(context, ing.getIngredient(), ing.getQuantity(), ing.getMeasure()));
 
         }
         ingredientsView.setText(sb.toString());
+        updateWidgetMethod(sb.toString());
+    }
+
+    private void updateWidgetMethod(String sb) {
+        FoodRepository repository = InjectorUtil.provideRepository(context);
+        repository.setCurrentRecipeIngredient(sb);
+
+        AppWidgetManager manager = AppWidgetManager.getInstance(context);
+        if (getActivity() != null) {
+            RemoteViews remoteViews = new RemoteViews(context.getPackageName(),
+                    R.layout.ingredients_widget);
+            ComponentName componentName = new ComponentName(getActivity(), IngredientsWidget.class);
+            remoteViews.setTextViewText(R.id.ingredient_text, sb);
+            manager.updateAppWidget(componentName, remoteViews);
+        }
     }
 
 
