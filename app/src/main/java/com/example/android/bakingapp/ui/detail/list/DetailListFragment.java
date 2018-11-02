@@ -148,7 +148,6 @@ public class DetailListFragment extends Fragment {
     private void updateWidgetMethod(String sb) {
         FoodRepository repository = InjectorUtil.provideRepository(context);
         repository.setCurrentRecipeIngredient(sb);
-
         AppWidgetManager manager = AppWidgetManager.getInstance(context);
         if (getActivity() != null) {
             RemoteViews remoteViews = new RemoteViews(context.getPackageName(),
