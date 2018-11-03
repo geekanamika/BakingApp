@@ -12,6 +12,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v7.widget.CardView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -53,6 +54,7 @@ public class DetailStepFragment extends Fragment implements ExoPlayer.EventListe
     private Boolean isTwoPane;
     private long position;
     private int currentWindow;
+    private boolean playWhenReady = true;
 
     @BindView(R.id.recipe_step_video_view)
     SimpleExoPlayerView exoPlayerView;
@@ -81,8 +83,11 @@ public class DetailStepFragment extends Fragment implements ExoPlayer.EventListe
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (savedInstanceState != null) {
+            Timber.d("saveInstance is not null");
             position = savedInstanceState.getLong(Constant.BUNDLE_KEY_CURRENT_POSITION, 0);
             currentWindow = savedInstanceState.getInt(Constant.BUNDLE_KEY_CURRENT_WINDOW, 0);
+            playWhenReady = savedInstanceState.getBoolean(Constant.BUNDLE_KEY_PLAY_WHEN_READY, false);
+            Timber.d(" "+ playWhenReady);
         }
 
     }
@@ -139,15 +144,12 @@ public class DetailStepFragment extends Fragment implements ExoPlayer.EventListe
         // image url for selected step if available
         String imageUrl = step.getThumbnailURL();
         // step image to image view if not null else set is invisible
-        if (imageUrl != null && !imageUrl.isEmpty()) {
+        if(!TextUtils.isEmpty(imageUrl)) {
             // Load and show Image
             Picasso.with(context)
                     .load(imageUrl)
                     .into(stepThumbnail);
             setViewVisibility(stepThumbnail, true);
-        } else {
-            // Hide image view
-            setViewVisibility(stepThumbnail, false);
         }
     }
 
@@ -203,8 +205,7 @@ public class DetailStepFragment extends Fragment implements ExoPlayer.EventListe
                     context, userAgent), new DefaultExtractorsFactory(),
                     null, null);
             exoPlayer.prepare(mediaSource);
-
-            exoPlayer.setPlayWhenReady(true);
+            exoPlayer.setPlayWhenReady(playWhenReady);
         }
     }
 
@@ -245,8 +246,7 @@ public class DetailStepFragment extends Fragment implements ExoPlayer.EventListe
 
     private void releasePlayer() {
         if (exoPlayer != null) {
-            position = exoPlayer.getCurrentPosition();
-            currentWindow = exoPlayer.getCurrentWindowIndex();
+            playerState();
             exoPlayer.stop();
             exoPlayer.release();
             exoPlayer = null;
@@ -352,5 +352,14 @@ public class DetailStepFragment extends Fragment implements ExoPlayer.EventListe
         super.onSaveInstanceState(outState);
         outState.putLong(Constant.BUNDLE_KEY_CURRENT_POSITION, position);
         outState.putInt(Constant.BUNDLE_KEY_CURRENT_WINDOW, currentWindow);
+        outState.putBoolean(Constant.BUNDLE_KEY_PLAY_WHEN_READY, playWhenReady);
+    }
+
+    private void playerState() {
+        if (exoPlayer != null) {
+            position = exoPlayer.getCurrentPosition();
+            currentWindow = exoPlayer.getCurrentWindowIndex();
+            playWhenReady = exoPlayer.getPlayWhenReady();
+        }
     }
 }

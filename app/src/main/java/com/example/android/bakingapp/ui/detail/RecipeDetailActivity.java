@@ -39,7 +39,6 @@ public class RecipeDetailActivity extends AppCompatActivity implements DetailLis
             manager.beginTransaction().add(R.id.recipe_step_container,
                     DetailStepFragment.newInstance(recipeResponse.getSteps().get(0))).commit();
 
-            //Todo set next button visibility to gone for fragment step screen
         } else {
             setStepListFragment();
         }

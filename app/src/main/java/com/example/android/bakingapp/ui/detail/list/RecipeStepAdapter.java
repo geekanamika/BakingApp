@@ -3,6 +3,7 @@ package com.example.android.bakingapp.ui.detail.list;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,7 +47,7 @@ public class RecipeStepAdapter extends RecyclerView.Adapter<RecipeStepAdapter.My
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int i) {
         holder.stepTextView.setText(stepList.get(i).getShortDescription());
-        if (stepList.get(i).getVideoURL().length() <= 0) {
+        if(TextUtils.isEmpty(stepList.get(i).getVideoURL())) {
             holder.playIcon.setVisibility(View.GONE);
         }
     }

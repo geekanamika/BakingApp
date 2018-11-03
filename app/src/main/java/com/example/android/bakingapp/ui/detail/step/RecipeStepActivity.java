@@ -20,7 +20,10 @@ public class RecipeStepActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipe_step);
 
-        extractDataFromBundle();
+        if (savedInstanceState == null) {
+            Timber.d("save instance is null");
+            extractDataFromBundle();
+        }
     }
 
     private void extractDataFromBundle() {
