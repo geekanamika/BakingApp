@@ -10,4 +10,6 @@ public class Constant {
     public static final String USER_AGENT = "StepVideo";
     public static final String MEDIA_SESSION_TAG = "MEDIA_SESSION_KEY";
     public static final int PENDING_INTENT_REQUEST_CODE = 415;
+    public static final String BUNDLE_KEY_CURRENT_WINDOW = "bundle_key_cur_window";
+    public static final String BUNDLE_KEY_CURRENT_POSITION = "bundle_key_position";
 }

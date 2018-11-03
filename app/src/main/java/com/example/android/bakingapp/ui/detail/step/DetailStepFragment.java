@@ -41,6 +41,7 @@ import com.squareup.picasso.Picasso;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import timber.log.Timber;
 
 
 public class DetailStepFragment extends Fragment implements ExoPlayer.EventListener {
@@ -50,6 +51,8 @@ public class DetailStepFragment extends Fragment implements ExoPlayer.EventListe
     private Context context;
     private Step step;
     private Boolean isTwoPane;
+    private long position;
+    private int currentWindow;
 
     @BindView(R.id.recipe_step_video_view)
     SimpleExoPlayerView exoPlayerView;
@@ -77,6 +80,10 @@ public class DetailStepFragment extends Fragment implements ExoPlayer.EventListe
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (savedInstanceState != null) {
+            position = savedInstanceState.getLong(Constant.BUNDLE_KEY_CURRENT_POSITION, 0);
+            currentWindow = savedInstanceState.getInt(Constant.BUNDLE_KEY_CURRENT_WINDOW, 0);
+        }
 
     }
 
@@ -100,8 +107,6 @@ public class DetailStepFragment extends Fragment implements ExoPlayer.EventListe
         isTwoPane = getResources().getBoolean(R.bool.isTablet);
 
         setTextAndImageViewValues();
-
-        setVideoToExoplayer();
     }
 
     private void setVideoToExoplayer() {
@@ -149,7 +154,6 @@ public class DetailStepFragment extends Fragment implements ExoPlayer.EventListe
     @Override
     public void onDetach() {
         super.onDetach();
-        // mListener = null;
     }
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
@@ -161,14 +165,12 @@ public class DetailStepFragment extends Fragment implements ExoPlayer.EventListe
                             | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                             | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                             | View.SYSTEM_UI_FLAG_FULLSCREEN
-                            | View.SYSTEM_UI_FLAG_IMMERSIVE);
+                            | View.SYSTEM_UI_FLAG_IMMERSIVE
+                            | View.SYSTEM_UI_FLAG_LOW_PROFILE
+                            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+            );
         }
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        releasePlayer();
     }
 
     private void fullScreenView(SimpleExoPlayerView exoPlayer) {
@@ -190,6 +192,7 @@ public class DetailStepFragment extends Fragment implements ExoPlayer.EventListe
             TrackSelector trackSelector = new DefaultTrackSelector();
             exoPlayer = ExoPlayerFactory.newSimpleInstance(context,
                     trackSelector, new DefaultLoadControl());
+            exoPlayer.seekTo(currentWindow, position);
             // setting player to the exo-playerView
             exoPlayerView.setPlayer(exoPlayer);
             // adding listeners, all functions are implemented
@@ -200,6 +203,7 @@ public class DetailStepFragment extends Fragment implements ExoPlayer.EventListe
                     context, userAgent), new DefaultExtractorsFactory(),
                     null, null);
             exoPlayer.prepare(mediaSource);
+
             exoPlayer.setPlayWhenReady(true);
         }
     }
@@ -241,6 +245,8 @@ public class DetailStepFragment extends Fragment implements ExoPlayer.EventListe
 
     private void releasePlayer() {
         if (exoPlayer != null) {
+            position = exoPlayer.getCurrentPosition();
+            currentWindow = exoPlayer.getCurrentWindowIndex();
             exoPlayer.stop();
             exoPlayer.release();
             exoPlayer = null;
@@ -248,6 +254,58 @@ public class DetailStepFragment extends Fragment implements ExoPlayer.EventListe
 
         if (mediaSession != null) {
             mediaSession.setActive(false);
+        }
+    }
+
+    /**
+     * Before API Level 24 there is no guarantee of onStop being called.
+     * So we have to release the player as early as possible in onPause
+     */
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (Util.SDK_INT <= 23) {
+            releasePlayer();
+        }
+    }
+
+    /**
+     * Starting with API Level 24 (which brought multi and split window mode) onStop is guaranteed
+     * to be called and in the paused mode our activity is eventually still visible.
+     * Hence we need to wait releasing until onStop.
+     */
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (Util.SDK_INT > 23) {
+            releasePlayer();
+        }
+    }
+
+    /**
+     * with API level 24 Android supports multiple windows.
+     * As our app can be visible but not active in split window mode,
+     * we need to initialize the player in onStart.
+     */
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (Util.SDK_INT > 23) {
+            setVideoToExoplayer();
+        }
+    }
+
+    /**
+     * Before API level 24 we wait as long as possible until we grab resources,
+     * so we wait until onResume before initializing the player.
+     */
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if ((Util.SDK_INT <= 23 || exoPlayer == null)) {
+            setVideoToExoplayer();
         }
     }
 
@@ -289,4 +347,10 @@ public class DetailStepFragment extends Fragment implements ExoPlayer.EventListe
 
     }
 
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putLong(Constant.BUNDLE_KEY_CURRENT_POSITION, position);
+        outState.putInt(Constant.BUNDLE_KEY_CURRENT_WINDOW, currentWindow);
+    }
 }
